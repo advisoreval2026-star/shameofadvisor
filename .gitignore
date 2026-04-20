@@ -1,0 +1,9 @@
+# Note: config.js SHOULD be committed for GitHub Pages deployment — the
+# Supabase anon key is designed to be public (RLS policies provide security).
+# If you want a secret-key setup, you'd need a build/deploy step that injects
+# the values; that's overkill for a static site.
+
+.DS_Store
+*.swp
+.idea/
+.vscode/

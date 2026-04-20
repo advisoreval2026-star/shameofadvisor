@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>导师评议 · Advisor Review Board</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1f232d;
+    --panel-3: #262b37;
+    --border: #2a2f3a;
+    --border-2: #343a48;
+    --text: #e6e8ef;
+    --muted: #9aa3b2;
+    --accent: #7aa2ff;
+    --accent-2: #a78bfa;
+    --up: #ff7a45;
+    --down: #6a9bff;
+    --danger: #ef6767;
+    --warn: #f0b45a;
+    --ok: #6fd19a;
+    --chip: #2b3142;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header.site {
+    padding: 24px 28px 14px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(122,162,255,0.08), transparent);
+  }
+  header.site h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+  header.site .sub { color: var(--muted); margin-top: 6px; font-size: 13px; }
+
+  .disclaimer {
+    margin: 14px 28px 0; padding: 12px 14px;
+    background: rgba(239,103,103,0.08); border: 1px solid rgba(239,103,103,0.35);
+    border-radius: 10px; color: #f3c3c3; font-size: 13px; line-height: 1.55;
+  }
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: rgba(15,17,21,0.94); backdrop-filter: blur(10px); z-index: 5;
+  }
+  .toolbar input[type="text"], .toolbar select {
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none;
+  }
+  .toolbar input[type="text"] { min-width: 260px; }
+  .toolbar .count { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .toolbar button {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer;
+  }
+  .toolbar button:hover { border-color: var(--accent); }
+
+  .grid {
+    display: grid; gap: 14px; padding: 20px 28px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px; display: flex; gap: 12px; cursor: pointer; transition: transform .08s, border-color .15s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .avatar {
+    width: 56px; height: 56px; border-radius: 50%; background: var(--panel-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--muted); flex-shrink: 0;
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar.lg { width: 84px; height: 84px; font-size: 28px; }
+  .meta { flex: 1; min-width: 0; }
+  .name { font-weight: 600; font-size: 15px; }
+  .affil { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: var(--chip); color: var(--text); border: 1px solid var(--border);
+  }
+  .chip.disputed { background: rgba(240,180,90,0.12); color: var(--warn); border-color: rgba(240,180,90,0.35); }
+  .chip.rebutted { background: rgba(111,209,154,0.12); color: var(--ok); border-color: rgba(111,209,154,0.35); }
+  .chip.region   { background: rgba(122,162,255,0.12); color: var(--accent); border-color: rgba(122,162,255,0.35); }
+
+  /* ----- Modal ----- */
+  .backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none;
+    align-items: flex-start; justify-content: center; z-index: 50; padding: 28px 16px; overflow-y: auto;
+  }
+  .backdrop.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    width: min(820px, 100%); padding: 22px 24px 28px; margin: auto;
+  }
+  .modal-head { display: flex; gap: 16px; align-items: center; }
+  .modal-head h2 { margin: 0; font-size: 22px; }
+  .modal-head .close { margin-left: auto; background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; }
+  .modal-head .homepage-link { color: var(--accent); font-size: 13px; margin-top: 4px; display: inline-block; }
+
+  .section { margin-top: 20px; }
+  .section h3 { font-size: 13px; color: var(--muted); margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .block {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; font-size: 14px; line-height: 1.6; white-space: pre-wrap;
+  }
+  .block.empty { color: var(--muted); font-style: italic; }
+
+  /* ----- Reddit-style comments ----- */
+  .comment-form {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; margin-bottom: 16px;
+  }
+  .comment-form input[type="text"] {
+    width: 100%; background: var(--panel-3); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+    font-family: inherit; font-size: 13px; outline: none; margin-bottom: 8px;
+  }
+  .comment-form textarea {
+    width: 100%; background: var(--panel-3); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px;
+    font-family: inherit; font-size: 14px; outline: none; resize: vertical; min-height: 80px;
+  }
+  .comment-form .form-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .btn {
+    background: var(--accent); color: #0b0f1a; border: none;
+    border-radius: 8px; padding: 8px 14px; font-weight: 600; cursor: pointer; font-size: 13px;
+  }
+  .btn.secondary { background: var(--panel-3); color: var(--text); border: 1px solid var(--border); }
+  .btn.small { padding: 4px 10px; font-size: 12px; }
+  .btn:hover { opacity: 0.92; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .comments-list { display: flex; flex-direction: column; gap: 10px; }
+  .comment {
+    display: flex; gap: 10px;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .comment .vote {
+    display: flex; flex-direction: column; align-items: center; width: 28px;
+    color: var(--muted); flex-shrink: 0; user-select: none;
+  }
+  .vote-btn {
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    font-size: 16px; line-height: 1; padding: 2px; border-radius: 4px;
+  }
+  .vote-btn:hover { background: var(--panel-3); }
+  .vote-btn.up.active { color: var(--up); }
+  .vote-btn.down.active { color: var(--down); }
+  .vote .score { font-size: 12px; font-weight: 600; color: var(--text); margin: 2px 0; }
+  .vote .score.pos { color: var(--up); }
+  .vote .score.neg { color: var(--down); }
+
+  .comment-body { flex: 1; min-width: 0; }
+  .comment-meta { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .comment-meta .author { color: var(--text); font-weight: 600; }
+  .comment-meta .op { color: var(--accent-2); font-weight: 600; margin-left: 6px; }
+  .comment-text { font-size: 14px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+  .comment-actions { display: flex; gap: 10px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .comment-actions button {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 12px; padding: 2px 4px; border-radius: 4px;
+  }
+  .comment-actions button:hover { background: var(--panel-3); color: var(--text); }
+  .comment-actions button.delete:hover { color: var(--danger); }
+
+  .reply-form { margin-top: 10px; padding: 10px; background: var(--panel-3); border: 1px solid var(--border); border-radius: 8px; }
+  .reply-form textarea { width: 100%; min-height: 60px; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-family: inherit; font-size: 13px; }
+  .reply-form .form-row { display: flex; gap: 6px; margin-top: 6px; }
+  .reply-form input[type="text"] { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 12px; flex: 1; }
+
+  .replies {
+    margin-top: 8px;
+    padding-left: 10px;
+    border-left: 2px solid var(--border-2);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .empty-state { color: var(--muted); font-style: italic; font-size: 13px; padding: 8px 0; }
+
+  .tag-rebuttal { color: var(--ok); font-size: 11px; background: rgba(111,209,154,0.12); border: 1px solid rgba(111,209,154,0.35); padding: 1px 6px; border-radius: 999px; margin-left: 6px; }
+  .tag-rumor    { color: var(--warn); font-size: 11px; background: rgba(240,180,90,0.12); border: 1px solid rgba(240,180,90,0.35); padding: 1px 6px; border-radius: 999px; margin-left: 6px; }
+
+  footer { padding: 20px 28px 40px; color: var(--muted); font-size: 12.5px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <h1>导师评议 · Advisor Review Board</h1>
+  <div class="sub">
+    基于公开社区文档的结构化视图，带 Reddit 风格的评论与投票 · Structured viewer with Reddit-style comments ·
+    <a id="source-link" href="https://docs.google.com/document/d/1-AtKUh-xE1CPRRDVlfPx1d42Trhr7F8qQIw69hP85Ds/preview" target="_blank" rel="noreferrer">查看原文档 / View source</a>
+  </div>
+</header>
+
+<div class="disclaimer">
+  <b>免责声明 / Disclaimer:</b>
+  本工具仅提供可视化和讨论入口，<b>不发布、不证实任何针对具体个人的指控</b>。所有评论均为用户匿名投稿，可能存在未经核实、片面或存在争议的内容。
+  如您是被提及的当事人或其学生，欢迎在对应导师页面发表评论或回复。照片来自公开教职员网页。
+  <br/><br/>
+  This is a public forum over a crowdsourced document. Comments are unverified user submissions. If you are a mentioned advisor or their student, please post a reply. Photos are from public faculty pages.
+</div>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="🔍 搜索姓名 / 学校 / Search..." />
+  <select id="region-filter">
+    <option value="">所有地区 / All regions</option>
+  </select>
+  <select id="status-filter">
+    <option value="">所有状态 / All statuses</option>
+    <option value="disputed">存在争议 / Disputed</option>
+    <option value="rebutted">已有申诉 / Has rebuttal</option>
+  </select>
+  <button id="export-btn" title="Export all local comments as JSON">⤓ 导出评论 / Export</button>
+  <button id="import-btn" title="Import comments JSON">⤒ 导入 / Import</button>
+  <input type="file" id="import-file" accept="application/json" style="display:none" />
+  <div class="count" id="count"></div>
+  <span id="backend-badge" style="font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);">…</span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <span id="footer-mode">……</span><br/>
+  Advisor Review Board · <a href="https://github.com/" target="_blank">source on GitHub</a>
+</footer>
+
+<div class="backdrop" id="backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="avatar lg" id="m-avatar">👤</div>
+      <div style="flex:1; min-width:0;">
+        <h2 id="m-name"></h2>
+        <div class="affil" id="m-affil"></div>
+        <div class="chips" id="m-chips" style="margin-top:6px;"></div>
+        <a id="m-homepage" class="homepage-link" target="_blank" rel="noreferrer" style="display:none;">🔗 教职员主页 / Faculty page</a>
+      </div>
+      <button class="close" aria-label="close" id="m-close">✕</button>
+    </div>
+
+    <div class="section">
+      <h3>原文档评论 / Source-doc Comments</h3>
+      <div class="block empty" id="m-comments"></div>
+    </div>
+
+    <div class="section">
+      <h3>原文档申诉 / Source-doc Rebuttal</h3>
+      <div class="block empty" id="m-rebuttals"></div>
+    </div>
+
+    <div class="section">
+      <h3>社区讨论 / Community Discussion <span id="m-comment-count" style="color:var(--muted); font-weight:400;"></span></h3>
+      <div class="comment-form">
+        <input type="text" id="c-author" placeholder="昵称（可选） / Nickname (optional, default: 匿名)" maxlength="40" />
+        <textarea id="c-body" placeholder="发表评论，提供事实和证据链接。Reply with facts and evidence links. (Ctrl+Enter to post)"></textarea>
+        <div class="form-row">
+          <label style="font-size:12px;color:var(--muted);"><input type="checkbox" id="c-op" /> 我是此导师本人/学生 / I am this advisor or their student</label>
+          <button class="btn" id="c-post" style="margin-left:auto;">发表 / Post</button>
+        </div>
+      </div>
+      <div class="comments-list" id="m-comments-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Supabase JS SDK (only used if config.js provides credentials) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Optional user-supplied credentials; falls back to local if absent -->
+<script src="config.js" onerror="void 0"></script>
+<script src="data.js"></script>
+<script src="backend.js"></script>
+<script>
+/* ============================================================
+ * Bootstrap
+ * ============================================================ */
+const SOURCE_DOC = "https://docs.google.com/document/d/1-AtKUh-xE1CPRRDVlfPx1d42Trhr7F8qQIw69hP85Ds/preview";
+const ADVISORS = (window.ADVISORS && Array.isArray(window.ADVISORS)) ? window.ADVISORS : [];
+
+// Count cache, populated once from backend
+let COUNTS = {};
+
+function advisorKey(a) { return `${a.name}|${a.university}`; }
+
+/* ============================================================
+ * State
+ * ============================================================ */
+const state = { search: "", region: "", status: "", activeIdx: -1 };
+
+/* ============================================================
+ * Rendering: cards
+ * ============================================================ */
+const grid = document.getElementById("grid");
+const countEl = document.getElementById("count");
+const regionSel = document.getElementById("region-filter");
+const statusSel = document.getElementById("status-filter");
+
+function uniqueRegions() {
+  const s = new Set();
+  ADVISORS.forEach(a => a.region && s.add(a.region));
+  return [...s].sort();
+}
+function populateRegionFilter() {
+  regionSel.innerHTML = '<option value="">所有地区 / All regions</option>';
+  uniqueRegions().forEach(r => {
+    const o = document.createElement("option");
+    o.value = r; o.textContent = r;
+    regionSel.appendChild(o);
+  });
+}
+
+function matches(a) {
+  const q = state.search.trim().toLowerCase();
+  if (q && !(
+    (a.name || "").toLowerCase().includes(q) ||
+    (a.name_cn || "").toLowerCase().includes(q) ||
+    (a.university || "").toLowerCase().includes(q)
+  )) return false;
+  if (state.region && a.region !== state.region) return false;
+  if (state.status === "disputed" && !a.disputed) return false;
+  if (state.status === "rebutted" && !a.has_rebuttal) return false;
+  return true;
+}
+
+function initials(name) {
+  if (!name) return "👤";
+  const parts = name.trim().split(/\s+/);
+  return (parts[0][0] || "").toUpperCase() + (parts.length > 1 ? (parts[parts.length-1][0] || "").toUpperCase() : "");
+}
+
+function chipHTML(a) {
+  const chips = [];
+  if (a.region) chips.push(`<span class="chip region">${escapeHtml(a.region)}</span>`);
+  if (a.disputed) chips.push(`<span class="chip disputed">存在争议 Disputed</span>`);
+  if (a.has_rebuttal) chips.push(`<span class="chip rebutted">已有申诉 Rebuttal</span>`);
+  (a.tags || []).forEach(t => chips.push(`<span class="chip">${escapeHtml(t)}</span>`));
+  return chips.join("");
+}
+
+function countCommentsTree(nodes) {
+  let n = 0;
+  for (const c of (nodes || [])) n += 1 + countCommentsTree(c.replies);
+  return n;
+}
+
+function render() {
+  const filtered = ADVISORS.filter(matches);
+  grid.innerHTML = "";
+  filtered.forEach((a) => {
+    const key = advisorKey(a);
+    const cCount = COUNTS[key] || 0;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="avatar">${a.photo ? `<img src="${escapeAttr(a.photo)}" alt="" onerror="this.parentElement.innerHTML='${escapeHtml(initials(a.name))}'"/>` : escapeHtml(initials(a.name))}</div>
+      <div class="meta">
+        <div class="name">${escapeHtml(a.name || "—")}${a.name_cn ? " · " + escapeHtml(a.name_cn) : ""}</div>
+        <div class="affil">${escapeHtml(a.university || "")}</div>
+        <div class="chips">${chipHTML(a)}</div>
+        ${cCount ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;">💬 ${cCount} 条评论 / comments</div>` : ""}
+      </div>`;
+    card.addEventListener("click", () => openModal(ADVISORS.indexOf(a)));
+    grid.appendChild(card);
+  });
+  countEl.textContent = `${filtered.length} / ${ADVISORS.length} 条 entries`;
+}
+
+/* ============================================================
+ * Modal
+ * ============================================================ */
+const backdrop = document.getElementById("backdrop");
+
+async function openModal(idx) {
+  state.activeIdx = idx;
+  const a = ADVISORS[idx];
+  document.getElementById("m-name").textContent = (a.name || "—") + (a.name_cn ? ` · ${a.name_cn}` : "");
+  document.getElementById("m-affil").textContent = a.university || "";
+  document.getElementById("m-chips").innerHTML = chipHTML(a);
+
+  const hp = document.getElementById("m-homepage");
+  if (a.homepage) { hp.href = a.homepage; hp.style.display = "inline-block"; } else { hp.style.display = "none"; }
+
+  const av = document.getElementById("m-avatar");
+  av.innerHTML = a.photo
+    ? `<img src="${escapeAttr(a.photo)}" alt="" onerror="this.parentElement.innerHTML='${escapeHtml(initials(a.name))}'"/>`
+    : escapeHtml(initials(a.name));
+
+  const cEl = document.getElementById("m-comments");
+  if (a.comments && a.comments.trim()) { cEl.textContent = a.comments; cEl.classList.remove("empty"); }
+  else { cEl.innerHTML = `详细评论请查看原文档 · See source doc for full comments (<a href="${SOURCE_DOC}" target="_blank" rel="noreferrer">open source</a>)`; cEl.classList.add("empty"); }
+
+  const rEl = document.getElementById("m-rebuttals");
+  if (a.rebuttals && a.rebuttals.trim()) { rEl.textContent = a.rebuttals; rEl.classList.remove("empty"); }
+  else if (a.has_rebuttal) { rEl.innerHTML = `此导师在原文档中<b>有申诉内容</b>，请前往原文档查看 · See source doc for rebuttal`; rEl.classList.add("empty"); }
+  else { rEl.textContent = "（暂无来自原文档的申诉 · No rebuttal in source doc yet）"; rEl.classList.add("empty"); }
+
+  document.getElementById("c-body").value = "";
+  document.getElementById("c-author").value = "";
+  document.getElementById("c-op").checked = false;
+
+  backdrop.classList.add("show");
+  document.body.style.overflow = "hidden";
+  await renderComments();
+}
+
+async function closeModal() {
+  backdrop.classList.remove("show");
+  state.activeIdx = -1;
+  document.body.style.overflow = "";
+  try { COUNTS = await window.Storage.loadCounts(); } catch {}
+  render();
+}
+
+document.getElementById("m-close").addEventListener("click", closeModal);
+backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && backdrop.classList.contains("show")) closeModal(); });
+
+/* ============================================================
+ * Comment tree CRUD + render (backend-agnostic via Storage)
+ * ============================================================ */
+function currentAdvisor() { return ADVISORS[state.activeIdx]; }
+function currentKey() { return advisorKey(currentAdvisor()); }
+
+async function addTopComment({ author, body, op }) {
+  await window.Storage.addComment(currentKey(), { author, body, op, parentId: null });
+}
+async function addReply(parentId, { author, body, op }) {
+  await window.Storage.addComment(currentKey(), { author, body, op, parentId });
+}
+async function castVote(commentId, dir) {
+  await window.Storage.castVote(currentKey(), commentId, dir === "up" ? 1 : -1);
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return `${s}秒前 ${s}s ago`;
+  if (s < 3600) return `${Math.floor(s/60)} 分钟前 ${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)} 小时前 ${Math.floor(s/3600)}h ago`;
+  return new Date(ts).toLocaleDateString();
+}
+
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+async function renderComments() {
+  const listEl = document.getElementById("m-comments-list");
+  const countEl = document.getElementById("m-comment-count");
+  listEl.innerHTML = `<div class="empty-state">加载中 · Loading…</div>`;
+  const thread = await window.Storage.loadThread(currentKey());
+  const total = countCommentsTree(thread);
+  countEl.textContent = total ? `(${total})` : "";
+  COUNTS[currentKey()] = total;
+  if (!thread.length) {
+    listEl.innerHTML = `<div class="empty-state">暂无讨论，来发表第一条评论吧 · No discussion yet. Be the first.</div>`;
+    return;
+  }
+  listEl.innerHTML = thread.map(c => renderComment(c, 0)).join("");
+  attachCommentHandlers();
+}
+
+function renderComment(c, depth) {
+  const myVote = window.Storage.getMyVote(c.id) || 0;   // 1 | -1 | 0
+  const score = (typeof c.score === "number") ? c.score : ((c.up || 0) - (c.down || 0));
+  const scoreCls = score > 0 ? "pos" : (score < 0 ? "neg" : "");
+  const repliesHtml = (c.replies && c.replies.length)
+    ? `<div class="replies">${c.replies.map(r => renderComment(r, depth+1)).join("")}</div>` : "";
+  return `
+    <div class="comment" data-id="${c.id}">
+      <div class="vote">
+        <button class="vote-btn up ${myVote===1?'active':''}" data-action="vote-up" data-id="${c.id}" title="Upvote">▲</button>
+        <div class="score ${scoreCls}">${score}</div>
+        <button class="vote-btn down ${myVote===-1?'active':''}" data-action="vote-down" data-id="${c.id}" title="Downvote">▼</button>
+      </div>
+      <div class="comment-body">
+        <div class="comment-meta">
+          <span class="author">${escapeHtml(c.author || "匿名")}</span>
+          ${c.op ? `<span class="op">[当事人/学生 · OP]</span>` : ""}
+          · <span title="${new Date(c.ts || c.created_at).toLocaleString()}">${timeAgo(c.ts || new Date(c.created_at).getTime())}</span>
+        </div>
+        <div class="comment-text">${escapeHtml(c.body)}</div>
+        <div class="comment-actions">
+          <button data-action="reply" data-id="${c.id}">↩ 回复 Reply</button>
+        </div>
+        <div class="reply-slot" data-id="${c.id}"></div>
+        ${repliesHtml}
+      </div>
+    </div>`;
+}
+
+function attachCommentHandlers() {
+  document.querySelectorAll("[data-action='vote-up']").forEach(b => b.onclick = async () => { await castVote(b.dataset.id, "up"); await renderComments(); });
+  document.querySelectorAll("[data-action='vote-down']").forEach(b => b.onclick = async () => { await castVote(b.dataset.id, "down"); await renderComments(); });
+  document.querySelectorAll("[data-action='reply']").forEach(b => b.onclick = () => openReply(b.dataset.id));
+}
+
+function openReply(parentId) {
+  const slot = document.querySelector(`.reply-slot[data-id='${parentId}']`);
+  if (!slot) return;
+  if (slot.firstChild) { slot.innerHTML = ""; return; }
+  slot.innerHTML = `
+    <div class="reply-form">
+      <div class="form-row" style="margin-bottom:6px;">
+        <input type="text" placeholder="昵称（可选） / Nickname" class="r-author" maxlength="40"/>
+        <label style="font-size:11px;color:var(--muted);white-space:nowrap;"><input type="checkbox" class="r-op"/> 本人/学生 OP</label>
+      </div>
+      <textarea class="r-body" placeholder="回复... / Reply..."></textarea>
+      <div class="form-row">
+        <button class="btn small r-submit">发表 Post</button>
+        <button class="btn small secondary r-cancel">取消 Cancel</button>
+      </div>
+    </div>`;
+  slot.querySelector(".r-cancel").onclick = () => slot.innerHTML = "";
+  slot.querySelector(".r-submit").onclick = async () => {
+    const body = slot.querySelector(".r-body").value.trim();
+    const author = slot.querySelector(".r-author").value.trim();
+    const op = slot.querySelector(".r-op").checked;
+    if (!body) { alert("内容不能为空 / Body required"); return; }
+    const btn = slot.querySelector(".r-submit"); btn.disabled = true; btn.textContent = "发送中…";
+    try { await addReply(parentId, { author, body, op }); slot.innerHTML = ""; await renderComments(); }
+    catch (e) { alert("发送失败 / Failed: " + e.message); btn.disabled = false; btn.textContent = "发表 Post"; }
+  };
+}
+
+/* ============================================================
+ * Post top-level comment
+ * ============================================================ */
+document.getElementById("c-post").addEventListener("click", async () => {
+  const body = document.getElementById("c-body").value.trim();
+  const author = document.getElementById("c-author").value.trim();
+  const op = document.getElementById("c-op").checked;
+  if (!body) { alert("内容不能为空 / Body required"); return; }
+  const btn = document.getElementById("c-post"); btn.disabled = true; btn.textContent = "发送中…";
+  try {
+    await addTopComment({ author, body, op });
+    document.getElementById("c-body").value = "";
+    await renderComments();
+  } catch (e) { alert("发送失败 / Failed: " + e.message); }
+  btn.disabled = false; btn.textContent = "发表 / Post";
+});
+document.getElementById("c-body").addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") document.getElementById("c-post").click();
+});
+
+/* ============================================================
+ * Toolbar
+ * ============================================================ */
+document.getElementById("search").addEventListener("input", e => { state.search = e.target.value; render(); });
+regionSel.addEventListener("change", e => { state.region = e.target.value; render(); });
+statusSel.addEventListener("change", e => { state.status = e.target.value; render(); });
+
+document.getElementById("export-btn").addEventListener("click", () => {
+  const comments = JSON.parse(localStorage.getItem("advisor_comments_v2") || "{}");
+  const votes = JSON.parse(localStorage.getItem("advisor_votes_v2") || "{}");
+  const payload = { comments, votes, exported_at: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `advisor_comments_${new Date().toISOString().slice(0,10)}.json`; a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+document.getElementById("import-file").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const txt = await f.text();
+    const data = JSON.parse(txt);
+    if (!data.comments) throw new Error("Invalid file");
+    if (!confirm("导入将合并评论到本地存储。继续？\nImport will merge comments into local storage. Continue?")) return;
+    const cur = JSON.parse(localStorage.getItem("advisor_comments_v2") || "{}");
+    for (const k of Object.keys(data.comments || {})) cur[k] = (cur[k] || []).concat(data.comments[k]);
+    localStorage.setItem("advisor_comments_v2", JSON.stringify(cur));
+    if (data.votes) {
+      const cv = JSON.parse(localStorage.getItem("advisor_votes_v2") || "{}");
+      localStorage.setItem("advisor_votes_v2", JSON.stringify(Object.assign(cv, data.votes)));
+    }
+    alert("导入成功 / Imported — reload page to see changes");
+  } catch (err) { alert("导入失败 / Import failed: " + err.message); }
+  e.target.value = "";
+});
+
+/* ============================================================
+ * Async boot — wait for Storage, then populate counts & render
+ * ============================================================ */
+(async function boot() {
+  await window.__advisorReady;
+  const badge = document.getElementById("backend-badge");
+  const footerMode = document.getElementById("footer-mode");
+  if (window.Storage.mode === "supabase") {
+    badge.textContent = "☁ Supabase";
+    badge.style.color = "var(--ok)";
+    badge.style.borderColor = "rgba(111,209,154,0.4)";
+    footerMode.textContent = "Comments synced live via Supabase · 评论通过 Supabase 实时同步";
+    // Hide export/import (they're only meaningful in local mode)
+    document.getElementById("export-btn").style.display = "none";
+    document.getElementById("import-btn").style.display = "none";
+  } else {
+    badge.textContent = "💾 Local (per-browser)";
+    footerMode.textContent = "Comments saved locally in this browser only · 评论仅保存在本浏览器";
+  }
+  try { COUNTS = await window.Storage.loadCounts(); } catch (e) { console.warn(e); }
+  populateRegionFilter();
+  render();
+})();
+</script>
+</body>
+</html>
