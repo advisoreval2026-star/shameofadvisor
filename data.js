@@ -23,10 +23,8 @@
 window.ADVISORS = [
   // ========== US - California / West ==========
   { name: "Min Xu", university: "CMU", region: "US · West", disputed: true,
-    photo: "https://xulabs.github.io/images/min-xu-2025.jpg",
     homepage: "https://xulabs.github.io/min-xu/" },
   { name: "Jure Leskovec", university: "Stanford", region: "US · West",
-    photo: "https://cs.stanford.edu/people/jure/images/jure-2b.jpg",
     homepage: "https://cs.stanford.edu/~jure/" },
   { name: "Zhiting Hu", university: "UCSD", region: "US · West" },
   { name: "Lianhui Qin", university: "UCSD", region: "US · West" },
@@ -34,11 +32,9 @@ window.ADVISORS = [
   { name: "Biwei Huang", university: "UCSD", region: "US · West" },
   { name: "Nuno Vasconcelos", university: "UCSD", region: "US · West" },
   { name: "Pengtao Xie", university: "UCSD", region: "US · West", disputed: true,
-    photo: "https://pengtaoxie.github.io/UCSD-pengtaoxie.jpg",
     homepage: "https://pengtaoxie.github.io/" },
   { name: "Yufei Ding", university: "UCSD", region: "US · West", disputed: true, has_rebuttal: true,
     tags: ["学生为其辩护 / students defend"],
-    photo: "https://lh3.googleusercontent.com/sitesv/AA5AbUCFNSDmNE7B7H3nSc4PVdE7tS6DKMH4zbFD-blBwXHUdtTUGum0_nW8zsVqvn150zAMUXwo8ggdwfEh5Chznf3dJkXlWSsXVUKPHQyqutQWxihYW4ZeW8Qzf21BPc1xDhMBXjXE9WWDPmo0-K9ecXyfoyPKEiz0cG3vT_e6BTTtWYfe4RG8r_4huE0iBW6ZmD-eyz8NpVlKswIsL8_OMEahYz_B7U2jSvPXNh4=w1280",
     homepage: "https://yufeiding.ucsd.edu/" },
   { name: "Hao Su", university: "UCSD", region: "US · West" },
   { name: "Zhuowen Tu", university: "UCSD", region: "US · West" },
@@ -46,7 +42,6 @@ window.ADVISORS = [
   { name: "Jiaqi Ma", university: "UCLA", region: "US · West" },
   { name: "Jason Cong", university: "UCLA", region: "US · West" },
   { name: "Quanquan Gu", university: "UCLA", region: "US · West",
-    photo: "http://web.cs.ucla.edu/~qgu/image/qgu.jpg",
     homepage: "http://web.cs.ucla.edu/~qgu/" },
   { name: "Eric Xin Wang", university: "UCSB", region: "US · West" },
   { name: "Shiyu Chang", university: "UCSB", region: "US · West" },
@@ -74,7 +69,6 @@ window.ADVISORS = [
 
   // ========== US - Midwest ==========
   { name: "Jimeng Sun", university: "UIUC", region: "US · Midwest", disputed: true,
-    photo: "https://ws.engr.illinois.edu/directory/viewphoto.aspx?photo=11798&s=300",
     homepage: "https://siebelschool.illinois.edu/about/people/faculty/jimeng" },
   { name: "Bo Li", university: "UIUC", region: "US · Midwest" },
   { name: "Hua Li", university: "UIUC", region: "US · Midwest" },
@@ -92,7 +86,6 @@ window.ADVISORS = [
   { name: "Dingwen Tao", university: "IUB", region: "US · Midwest" },
   { name: "Fengguang Song", university: "IUB", region: "US · Midwest" },
   { name: "Sharon Li", university: "UW-Madison", region: "US · Midwest",
-    photo: "https://pages.cs.wisc.edu/~sharonli/images/yixuanli-2019.JPG",
     homepage: "https://pages.cs.wisc.edu/~sharonli/" },
   { name: "Xiaobin Xiong", university: "UW-Madison", region: "US · Midwest" },
   { name: "Sikai Chen", university: "UW-Madison", region: "US · Midwest" },
@@ -113,7 +106,6 @@ window.ADVISORS = [
   { name: "David Held", university: "CMU", region: "US · Northeast" },
   { name: "Ding Zhao", university: "CMU", region: "US · Northeast" },
   { name: "Chaowei Xiao", university: "JHU", region: "US · Northeast", disputed: true, has_rebuttal: true,
-    photo: "https://xiaocw11.github.io/img/avatar_new.jpg",
     homepage: "https://xiaocw11.github.io/" },
   { name: "Sijia Geng", university: "JHU", region: "US · Northeast" },
   { name: "Jason Eisner", university: "JHU", region: "US · Northeast" },
@@ -137,7 +129,6 @@ window.ADVISORS = [
   { name: "Lan Tian", university: "GWU", region: "US · Northeast" },
   { name: "Lichao Sun", university: "Lehigh", region: "US · Northeast", has_rebuttal: true,
     tags: ["学生为其辩护 / students defend"],
-    photo: "https://lichao-sun.github.io/files/sun.png",
     homepage: "https://lichao-sun.github.io/" },
 
   // ========== US - South / Mid-Atlantic ==========
@@ -148,7 +139,6 @@ window.ADVISORS = [
   { name: "Zhengzhong Tu", university: "TAMU", region: "US · South" },
   { name: "Shuiwang Ji", university: "TAMU", region: "US · South" },
   { name: "Xia Hu", university: "Rice / TAMU", region: "US · South",
-    photo: "https://cs.rice.edu/~xh37/files/Hu.jpg",
     homepage: "https://cs.rice.edu/~xh37/index.html" },
   { name: "Tony Geng", university: "Rice", region: "US · South" },
   { name: "Yanjie Fu", university: "ASU", region: "US · South" },
@@ -158,7 +148,6 @@ window.ADVISORS = [
   { name: "Tianyi Zhou", university: "UMD", region: "US · South" },
   { name: "Xiaorui Liu", university: "NCSU", region: "US · South" },
   { name: "Mohit Bansal", university: "UNC", region: "US · South",
-    photo: "https://www.cs.unc.edu/~mbansal/images/mohitbansal2025.png",
     homepage: "https://www.cs.unc.edu/~mbansal/" },
   { name: "Huaxiu Yao", university: "UNC", region: "US · South" },
   { name: "Tianlong Chen", university: "UNC", region: "US · South" },
